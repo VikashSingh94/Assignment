@@ -1,4 +1,3 @@
-import com.sun.javafx.scene.EnteredExitedHandler;
 
 import java.util.*;
 
@@ -9,64 +8,63 @@ import java.util.*;
  *
  * @author vikash Singh
  * @date   09 Jan 2018
- * @version 1.0
+ * @version 1.1
  *
- *  In this HashMap generics implementation does not handle the collision resolution
+ *  In this HashMap generics implementation handle the collision resolution
  *  and HashMap is also mutable
+ *
+ *  HashMap use the combination of ArrayList and Binary tree data structure
+ *  that improve the time complexity as compared to ArrayList and Linked list implementation.
  */
 
 class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 {
 
-  private ArrayList< Entry<K,V> > arrayList;
-  private int capacity = 100;
+    private ArrayList< Entry<K,V> > arrayList; //ArrayList storing the Tree object
+    private int capacity = (1 << 4); //aka 16 ,Default size
 
-
-  public HashMap()
-  {
-      arrayList = new ArrayList<>(capacity);
-      //initialization
-      for(int i =0 ;i< capacity;i++)
+    public HashMap()
+    {
+        arrayList = new ArrayList<>(capacity);
+        //initialization
+        for(int i =0 ;i< capacity;i++)
           arrayList.add(null);
-  }
-  /*
-    public  boolean isEmpty()
-    {
-        return (arrayList.size() == 0);
     }
-  */
 
-    public  Entry<K,V> treeSearch(Entry<K,V> root ,Entry<K,V> data)
+
+    public  Entry<K,V> treeSearch(Entry<K,V> root ,K key)
     {
-        if(root == null || (root.compareTo(data) == 0))
+        if(root == null || (root.getKey().compareTo(key) == 0))
             return root ;
 
-        if(data.compareTo(root) < 0)
-            return  treeSearch(root.getLeft(),data);
+        if(key.compareTo(root.getKey()) < 0)
+            return  treeSearch(root.getLeft(),key);
         else
-            return treeSearch(root.getRight(),data);
+            return treeSearch(root.getRight(),key);
     }
 
 
-    public boolean isContain(K key , V value)
+    public boolean isContain(K key)
     {
         int hash = Math.abs(key.hashCode() % capacity);
 
-        if(arrayList.get(hash) == null)
+        //starting root of the BinaryTree corresponding to hash value
+        Entry<K,V> rootNode = arrayList.get(hash);
+
+        if(rootNode == null)
             return false;
         else
         {
-            // Entry<K,V> isPresent = treeSearch(arrayList.get(hash) , new Entry<K,V>(key,value),new EntryComparator<>());
-            //refactor here for the arguments
-            Entry<K,V> isKeyPresent = treeSearch(arrayList.get(hash) , new Entry<>(key,value));
+            //if collision occur ,then we  have to search in BinaryTree
+            Entry<K,V> isKeyPresent = treeSearch(rootNode , key);
 
             if(isKeyPresent == null)
                 return false;
             else
                 return true;
         }
-
     }
+
 
     public  Entry<K ,V > treeInsertion(Entry<K,V> root, Entry<K,V> data)
     {
@@ -87,13 +85,22 @@ class HashMap<K extends Comparable<K>,V extends Comparable<V>>
         return root;
     }
 
+
    public  void add(K key,V value)throws Exception
    {
        int hash = Math.abs(key.hashCode() % capacity);
-       //handle the duplicate exception here
-       if(!isContain(key,value)) {
-           Entry<K,V> root = treeInsertion(arrayList.get(hash),new Entry<>(key, value));
-           arrayList.add(hash, root);
+
+       if (!isContain(key))
+       {
+           Entry<K, V> rootNode = arrayList.get(hash);
+           Entry<K,V>  data = new Entry<>(key, value);
+
+           //Inserting  the key-value pair into the  Binary tree
+           rootNode = treeInsertion(rootNode , data);
+
+           //adding the updated root after inserting the key-value pair into the Binary tree
+           arrayList.add(hash, rootNode);
+
        }
        else {
            throw new Exception("Duplicate key");
@@ -101,87 +108,73 @@ class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 
    }
 
-
-
-   //searching the object in the Binary tree
-  /*
-   public  Entry<K,V> treeSearch(Entry<K,V> root ,Entry<K,V> data, Comparator<Entry<K,V>>comparator)
+   public  V get(K key)throws  Exception
    {
-       if(root == null || (comparator.compare(root,data) == 0))
-           return root ;
+       int hash = Math.abs(key.hashCode() % capacity);
 
-       if(comparator.compare(data,root) < 0)
-          return  treeSearch(root.getLeft(),data,comparator);
+       Entry<K,V> rootNode = arrayList.get(hash);
+
+       Entry<K,V> keyNode = treeSearch( rootNode, key);
+
+       if ( keyNode == null)
+           throw new Exception("key not present");
        else
-          return treeSearch(root.getRight(),data,comparator);
-   }
-*/
-
-  /*
-
-   public  void remove(K key) throws Exception
-   {
-     if(isContain(key))
-           arrayList.remove(key.hashCode()); //remove with help of index
-       else
-           throw  new IllegalAccessException("Key not present");
+           return keyNode.getValue();
 
    }
-   */
 
 
-}
-
-//this should be hash map inner  public class (refactor)
-
-class  Entry<K extends Comparable<K>,V extends Comparable<V>> implements Comparable< Entry<K,V> >
-{
-
-    private K key;
-    private V value;
-    private Entry<K,V> left;
-    private Entry<K,V> right;
-
-    public Entry(K key, V value)
+    public class  Entry<K extends Comparable<K>,V extends Comparable<V>> implements Comparable< Entry<K,V> >
     {
-        this.key    = key;
-        this.value  = value;
-        this.left   = null;
-        this.right  = null;
-    }
 
-    public V getValue() {
-        return value;
-    }
+        private K key;
+        private V value;
+        private Entry<K,V> left;
+        private Entry<K,V> right;
 
-    public K getKey() {
-        return key;
-    }
+        public Entry(K key, V value)
+        {
+            this.key    = key;
+            this.value  = value;
+            this.left   = null;
+            this.right  = null;
+        }
 
-    public Entry<K,V> getLeft() {
-        return this.left;
-    }
+        public V getValue() {
+            return value;
+        }
 
-    public Entry<K, V> getRight() {
-        return right;
-    }
+        public K getKey() {
+            return key;
+        }
 
-    public void setLeft(Entry<K, V> left) {
-        this.left = left;
-    }
+        public Entry<K,V> getLeft() {
+            return this.left;
+        }
 
-    public void setRight(Entry<K, V> right) {
-        this.right = right;
-    }
+        public Entry<K, V> getRight() {
+            return right;
+        }
 
-    @Override
+        public void setLeft(Entry<K, V> left) {
+            this.left = left;
+        }
 
-    public int compareTo(Entry<K,V> obj){
-        return obj.getValue().compareTo(this.getValue());
+        public void setRight(Entry<K, V> right) {
+            this.right = right;
+        }
+
+        @Override
+
+        public int compareTo(Entry<K,V> obj){
+            return this.getValue().compareTo(obj.getValue());
+        }
+
+        // search(key) = getleft.search(key) || getright.search(key)
+
     }
 
 }
-
 
 /*
 class EntryComparator<K extends Comparable<K>,V extends Comparable<V> > implements Comparator<Entry<K,V>>
@@ -200,8 +193,9 @@ public class Generics {
     {
         HashMap<String,String> mis = new HashMap<>();
         mis.add("vikash" , "Singh");
-        mis.add("vikash" , "kumar");
-        mis.add("Ironman" , "2");
+        mis.add("Vickey" , "Singh");
+
+        System.out.println(mis.get("Vickey"));
 
 
     }
