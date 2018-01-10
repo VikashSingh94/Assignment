@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  *
@@ -8,7 +10,7 @@ import java.util.List;
  *
  * @author vikash Singh
  * @date   09 Jan 2018
- * @version 1.1
+ * @version 1.4
  *
  *  In this HashMap generics implementation handle the collision resolution
  *  and HashMap is also mutable
@@ -19,18 +21,24 @@ import java.util.List;
 
 final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 {
-    final private int capacity = (1 << 4); //aka 16 ,Default size
-    final private  Entry<K,V> [] table = new Entry[capacity]; //ArrayList storing the Tree object
-    private int size = 0;
+    final private int capacity = (1 << 2); //aka 256,Default size
+
+    final private  Entry<K,V> [] table = new Entry[capacity]; //Array  storing the Tree object
+
+    final private  Entry<K,V> [] entriesArray;
 
 
     public HashMap(Entry<K,V> ... entry)throws Exception
     {
+        //entriesArray will store key-value in  sequential manner
+        entriesArray = new Entry[entry.length];
 
-        for (Entry<K,V> tuple : entry)
+        int currentEntryIndex = 0;
+
+        for (Entry<K,V> keyValue : entry)
         {
-            K key   =   tuple.getKey();
-            V value =   tuple.getValue();
+            K key   =   keyValue.getKey();
+            V value =   keyValue.getValue();
 
             int hash = Math.abs(key.hashCode() % capacity);
 
@@ -44,9 +52,9 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 
                 //adding the updated root after inserting the key-value pair into the Binary tree
 
-                table[hash] = rootNode;
-                //represent no of the key-value pair in hash map
-                size++;
+                table[hash]  =  rootNode;
+                entriesArray[currentEntryIndex++] = keyValue;
+
             }
             else
             {
@@ -56,11 +64,18 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
         }
     }
 
+    public  void print()
+    {
+        for(Entry<K,V> entry: entriesArray)
+        {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
+    }
 
 
     public int size()
     {
-        return size;
+        return entriesArray.length;
     }
 
 
@@ -167,14 +182,21 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 
     }
 
-/*
-    public Iterator iterator()
+
+    public MapIterator iterator()
     {
-        return new Iterator();
+        return new MapIterator();
     }
 
+//HashMap<String,String> hashmap= new HashMap<>();
+//Iterator itr = hashmap.iterator();
+//            while(itr.hasNext())
+//            {
+//
+//                System.out.println();
+//            }
 
-    public class Iterator
+    public class MapIterator implements Iterator<Entry<K,V>>
     {
 
         int current;
@@ -182,11 +204,11 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 
         // The constructor initializes a new iterator that has not yet
         // returned any of the elements of the list.
-        public Iterator()
+        public MapIterator()
         {
-            // our list is stored backwards in the array, so the first item
-            // is really at the end of the array
-            current = list.size()-1;
+            // our key-value is stored forwards in the array, so the first item
+            // is really at the beginning of the array
+            current = 0;
         }
 
 
@@ -195,88 +217,29 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
         // elements.
         public boolean hasNext()
         {
-            return ( current >= 0 );
+            return ( current < entriesArray.length );
         }
 
 
-        // next() returns the next element in the list.  The first time next()
-        // is called on an iterator, the first element of the list is returned;
+        // next() returns the next element in the HashMap.  The first time next()
+        // is called on an iterator, the first element of the HashMap is returned;
         // the second time next() is called, the second element is returned;
         // and so on.
         //
-        // If there are no more elements in the list, a NoSuchElementException
-        // should be thrown.  You generally won't want to catch this exception,
-        // because it's an indication of a bug in your program; best to let
-        // the program crash (with useful information about where the crash
-        // occurred) so you can find and fix the problem.
-        public E next()
+        // If there are no more elements in the HashMap, a NoSuchElementException
+        // should be thrown.
+
+        public Entry<K,V> next()
         {
-            if ( current < 0 )
+            if ( current >= entriesArray.length )
                 throw new NoSuchElementException();
 
             // advance current and return the item we just passed.
-            current--;
-            return list.get( current + 1 );
+            current++;
+            //new instance instead of reference
+            return new Entry<>(entriesArray[current - 1]);
         }
     }
-*/
-
-
-
-
-         class Entry<K extends Comparable<K>, V extends Comparable<V>> implements Comparable<Entry<K, V>> {
-
-            private K key;
-            private V value;
-            private Entry<K, V> left;
-            private Entry<K, V> right;
-
-            public Entry(Entry<K,V> node)
-            {
-                this.key    =   node.getKey();
-                this.value  =   node.getValue();
-                this.left   =   node.getLeft();
-                this.right  =   node.getRight();
-            }
-
-            public Entry(K key, V value) {
-                this.key = key;
-                this.value = value;
-                this.left = null;
-                this.right = null;
-            }
-
-            public V getValue() {
-                return value;
-            }
-
-            public K getKey() {
-                return key;
-            }
-
-            public Entry<K, V> getLeft() {
-                return this.left;
-            }
-
-            public Entry<K, V> getRight() {
-                return right;
-            }
-
-            public void setLeft(Entry<K, V> left) {
-                this.left = left;
-            }
-
-            public void setRight(Entry<K, V> right) {
-                this.right = right;
-            }
-
-            @Override
-
-            public int compareTo(Entry<K, V> obj) {
-                return this.getValue().compareTo(obj.getValue());
-            }
-
-        }
 
 
 
