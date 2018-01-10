@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -16,28 +17,15 @@ import java.util.ArrayList;
  *  that improve the time complexity as compared to ArrayList and Linked list implementation.
  */
 
-
 final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 {
     final private int capacity = (1 << 4); //aka 16 ,Default size
-    final private ArrayList< Entry<K,V> > arrayList = new ArrayList<>(capacity); //ArrayList storing the Tree object
+    final private  Entry<K,V> [] table = new Entry[capacity]; //ArrayList storing the Tree object
+    private int size = 0;
 
-
-    public  HashMap()
-    {
-        //initialization
-        for(int i =0 ;i< capacity;i++)
-            arrayList.add(null);
-
-    }
 
     public HashMap(Entry<K,V> ... entry)throws Exception
     {
-
-        //initialization
-        for(int i =0 ;i< capacity;i++)
-            arrayList.add(null);
-
 
         for (Entry<K,V> tuple : entry)
         {
@@ -46,22 +34,35 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 
             int hash = Math.abs(key.hashCode() % capacity);
 
-            if (!isContain(key)) {
-                Entry<K, V> rootNode = arrayList.get(hash);
+            if (!containsKey(key))
+            {
+                Entry<K, V> rootNode = table[hash];
                 Entry<K, V> data = new Entry<>(key, value);
 
 
                 rootNode = treeInsertion(rootNode, data);
 
                 //adding the updated root after inserting the key-value pair into the Binary tree
-                arrayList.add(hash, rootNode);
 
-            } else {
+                table[hash] = rootNode;
+                //represent no of the key-value pair in hash map
+                size++;
+            }
+            else
+            {
                 throw new Exception("Duplicate key");
 
             }
         }
     }
+
+
+
+    public int size()
+    {
+        return size;
+    }
+
 
 
     public Entry<K, V> treeSearch(Entry<K, V> root, K key) {
@@ -75,12 +76,12 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
     }
 
 
-    public boolean isContain(K key)
+    public boolean containsKey(K key)
     {
         int hash = Math.abs(key.hashCode() % capacity);
 
         //starting root of the BinaryTree corresponding to hash value
-        Entry<K,V> rootNode = arrayList.get(hash);
+        Entry<K,V> rootNode = table[hash];
 
         if(rootNode == null)
             return false;
@@ -117,9 +118,37 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
     }
 
 
-    public  HashMap<K,V> add(K key,V value)throws Exception
+    public List traversePreRecursive(Entry<K,V> node) {
+        if (node == null) return new ArrayList();
+
+        List nodeValues = new ArrayList();
+        nodeValues.add(new Entry<>(node));
+        nodeValues.addAll(traversePreRecursive(node.getLeft()));
+        nodeValues.addAll(traversePreRecursive(node.getRight()));
+
+        return nodeValues;
+    }
+
+
+    public  HashMap<K,V> put(K key,V value)throws Exception
     {
-            return new HashMap<>(new Entry<>(key,value));
+        List<Entry<K,V>> entries = new ArrayList<>();
+
+        //adding the current key- value pair
+        entries.add(new Entry<>(key,value));
+
+
+        for(Entry<K,V> rootNode :table)
+        {
+            if(rootNode != null)
+                entries.addAll(traversePreRecursive(rootNode));
+        }
+
+        Entry<K,V> entriesArr[]  = new Entry[entries.size()];
+        entriesArr = entries.toArray(entriesArr);
+
+
+        return new HashMap<>(entriesArr);
     }
 
 
@@ -127,7 +156,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
     {
         int hash = Math.abs(key.hashCode() % capacity);
 
-        Entry<K,V> rootNode = arrayList.get(hash);
+        Entry<K,V> rootNode = table[hash];
 
         Entry<K,V> keyNode = treeSearch( rootNode, key);
 
@@ -138,6 +167,62 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
 
     }
 
+/*
+    public Iterator iterator()
+    {
+        return new Iterator();
+    }
+
+
+    public class Iterator
+    {
+
+        int current;
+
+
+        // The constructor initializes a new iterator that has not yet
+        // returned any of the elements of the list.
+        public Iterator()
+        {
+            // our list is stored backwards in the array, so the first item
+            // is really at the end of the array
+            current = list.size()-1;
+        }
+
+
+        // hasNext() returns true if there are more elements in the list
+        // that have not been returned, and false if there are no more
+        // elements.
+        public boolean hasNext()
+        {
+            return ( current >= 0 );
+        }
+
+
+        // next() returns the next element in the list.  The first time next()
+        // is called on an iterator, the first element of the list is returned;
+        // the second time next() is called, the second element is returned;
+        // and so on.
+        //
+        // If there are no more elements in the list, a NoSuchElementException
+        // should be thrown.  You generally won't want to catch this exception,
+        // because it's an indication of a bug in your program; best to let
+        // the program crash (with useful information about where the crash
+        // occurred) so you can find and fix the problem.
+        public E next()
+        {
+            if ( current < 0 )
+                throw new NoSuchElementException();
+
+            // advance current and return the item we just passed.
+            current--;
+            return list.get( current + 1 );
+        }
+    }
+*/
+
+
+
 
          class Entry<K extends Comparable<K>, V extends Comparable<V>> implements Comparable<Entry<K, V>> {
 
@@ -145,6 +230,14 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
             private V value;
             private Entry<K, V> left;
             private Entry<K, V> right;
+
+            public Entry(Entry<K,V> node)
+            {
+                this.key    =   node.getKey();
+                this.value  =   node.getValue();
+                this.left   =   node.getLeft();
+                this.right  =   node.getRight();
+            }
 
             public Entry(K key, V value) {
                 this.key = key;
@@ -186,15 +279,6 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>>
         }
 
 
-}
 
-/*
-class EntryComparator<K extends Comparable<K>,V extends Comparable<V> > implements Comparator<Entry<K,V>>
-{
-    @Override
-    public int compare(Entry<K,V> obj1 , Entry<K,V> obj2)
-    {
-        return  obj1.getKey().compareTo(obj2.getKey());
-    }
+
 }
-*/
