@@ -64,20 +64,6 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 
 
 
-
-    public Entry<K, V> treeSearch(Entry<K, V> root, K key) {
-        if (root == null || (root.getKey().compareTo(key) == 0))
-            return root;
-
-        if (key.compareTo(root.getKey()) < 0)
-            return treeSearch(root.getLeft(), key);
-        else
-            return treeSearch(root.getRight(), key);
-    }
-
-
-
-
     @Override
     public boolean containsKey(K key)
     {
@@ -99,6 +85,65 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
                 return true;
         }
     }
+
+
+
+    @Override
+    public  V get(K key)
+    {
+        int hash = Math.abs(key.hashCode() % capacity);
+
+        Entry<K,V> rootNode = table[hash];
+
+        Entry<K,V> keyNode = treeSearch( rootNode, key);
+
+        if ( keyNode == null)
+            throw new NoSuchElementException();
+        else
+            return keyNode.getValue();
+
+    }
+
+
+
+    @Override
+    public  HashMap<K,V> put(K key,V value)
+    {
+        List<Entry<K,V>> entries = new ArrayList<>();
+
+        //adding the current key- value pair
+        entries.add(new Entry<>(key,value));
+
+
+        for(Entry<K,V> rootNode :table)
+        {
+            if(rootNode != null) {
+                // traversePreRecursive() method return list of key-value pair except
+                // duplicate key , while traversing the Binary tree .
+                entries.addAll(traversePreRecursive(rootNode, key));
+            }
+        }
+
+        Entry<K,V> entriesArr[]  = new Entry[entries.size()];
+        entriesArr = entries.toArray(entriesArr);
+
+
+        return new HashMap<>(entriesArr);
+    }
+
+
+
+    public Entry<K, V> treeSearch(Entry<K, V> root, K key) {
+        if (root == null || (root.getKey().compareTo(key) == 0))
+            return root;
+
+        if (key.compareTo(root.getKey()) < 0)
+            return treeSearch(root.getLeft(), key);
+        else
+            return treeSearch(root.getRight(), key);
+    }
+
+
 
 
     public  Entry<K ,V > treeInsertion(Entry<K,V> root, Entry<K,V> data)
@@ -135,46 +180,6 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
         return nodeValues;
     }
 
-    @Override
-    public  HashMap<K,V> put(K key,V value)
-    {
-        List<Entry<K,V>> entries = new ArrayList<>();
-
-        //adding the current key- value pair
-        entries.add(new Entry<>(key,value));
-
-
-        for(Entry<K,V> rootNode :table)
-        {
-            if(rootNode != null) {
-                // traversePreRecursive() method return list of key-value pair except
-                // duplicate key , while traversing the Binary tree .
-                entries.addAll(traversePreRecursive(rootNode, key));
-            }
-        }
-
-        Entry<K,V> entriesArr[]  = new Entry[entries.size()];
-        entriesArr = entries.toArray(entriesArr);
-
-
-        return new HashMap<>(entriesArr);
-    }
-
-    @Override
-    public  V get(K key)
-    {
-        int hash = Math.abs(key.hashCode() % capacity);
-
-        Entry<K,V> rootNode = table[hash];
-
-        Entry<K,V> keyNode = treeSearch( rootNode, key);
-
-        if ( keyNode == null)
-            throw new NoSuchElementException();
-        else
-            return keyNode.getValue();
-
-    }
 
 
     public MapIterator iterator()
@@ -241,8 +246,6 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
             return new Entry<>(entriesArray[current - 1]);
         }
     }
-
-
 
 
 }
