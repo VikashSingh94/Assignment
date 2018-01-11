@@ -5,7 +5,7 @@ import java.util.*;
 public class Generics {
 
 
-    public static void main(String args[])throws Exception
+    public static void main(String args[])
     {
 
 
