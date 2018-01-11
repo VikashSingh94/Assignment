@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
 
 final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements Map<K,V>
 {
-    final private int capacity = (1 << 2); //aka 256,Default size
+    final private int capacity = (1 << 8); //aka 256,Default size
 
     final private  Entry<K,V> [] table = new Entry[capacity]; //Array  storing the Tree object
 
