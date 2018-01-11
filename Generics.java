@@ -14,11 +14,14 @@ public class Generics {
 
         try
         {
-             studentMap =  studentMap.put("vikash", "Singh");
+             studentMap     =   studentMap.put("vikash", "Singh");
 
-             studentNewMap =  studentMap.put("Vickey", "Singh");
+             studentNewMap  =   studentMap.put("Vickey", "Singh");
 
-             studentNewMap =  studentNewMap.put("Xyz","singh");
+             studentNewMap  =   studentNewMap.put("Xyz","singh");
+
+             //replacing the existing key value in hashmap
+             studentNewMap  =   studentNewMap.put("vikash","kumar");
 
             Iterator studentMapIterator = studentMap.iterator();
 
