@@ -21,7 +21,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 {
     final private int capacity = (1 << 8); //aka 256,Default size
 
-    final private  Entry<K,V> [] table = new Entry[capacity]; //Array  storing the Tree object
+    final private  Entry<K,V> [] table = new Entry[capacity]; //Array  storing the rootNode for the BinaryTree of Entry type
 
     //entriesArray will store key-value in  sequential manner
     final private ArrayList< Entry<K,V> > sequentialEntries = new ArrayList<>();
@@ -46,8 +46,8 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
                 rootNode = treeInsertion(rootNode, data);
 
                 //adding the updated root after inserting the key-value pair into the Binary tree
-
                 table[hash] = rootNode;
+
                 sequentialEntries.add(entry);
             }
 
