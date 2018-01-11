@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -27,19 +25,21 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     final private  Entry<K,V> [] entriesArray;
 
 
-    public HashMap(Entry<K,V> ... entry)
+    public HashMap(Entry<K,V> ... entries)
     {
         //entriesArray will store key-value in  sequential manner
-        entriesArray = new Entry[entry.length];
+        entriesArray = new Entry[entries.length];
 
         int currentEntryIndex = 0;
 
-        for (Entry<K,V> keyValue : entry)
+        for (Entry<K,V> entry : entries)
         {
-            K key   =   keyValue.getKey();
-            V value =   keyValue.getValue();
+            if(entry != null)
+            {
+                K key = entry.getKey();
+                V value = entry.getValue();
 
-            int hash = Math.abs(key.hashCode() % capacity);
+                int hash = Math.abs(key.hashCode() % capacity);
 
                 Entry<K, V> rootNode = table[hash];
                 Entry<K, V> data = new Entry<>(key, value);
@@ -49,9 +49,9 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 
                 //adding the updated root after inserting the key-value pair into the Binary tree
 
-                table[hash]  =  rootNode;
-                entriesArray[currentEntryIndex++] = keyValue;
-
+                table[hash] = rootNode;
+                entriesArray[currentEntryIndex++] = entry;
+            }
 
         }
     }
@@ -109,26 +109,24 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     @Override
     public  HashMap<K,V> put(K key,V value)
     {
-        List<Entry<K,V>> entries = new ArrayList<>();
+        Entry<K,V> [] tempEntries = new Entry[entriesArray.length+1];
+
+        int currentIndex = 0;
 
         //adding the current key- value pair
-        entries.add(new Entry<>(key,value));
+        tempEntries[currentIndex++] = (new Entry<>(key,value));
 
 
-        for(Entry<K,V> rootNode :table)
+        for(Entry<K,V> mapEntry : entriesArray)
         {
-            if(rootNode != null) {
-                // traversePreRecursive() method return list of key-value pair except
-                // duplicate key , while traversing the Binary tree .
-                entries.addAll(traversePreRecursive(rootNode, key));
+            if(mapEntry != null)
+            {
+                if(mapEntry.getKey().compareTo(key) != 0)
+                    tempEntries[currentIndex++] = new Entry<>(mapEntry);
             }
         }
-
-        Entry<K,V> entriesArr[]  = new Entry[entries.size()];
-        entriesArr = entries.toArray(entriesArr);
-
-
-        return new HashMap<>(entriesArr);
+        
+        return new HashMap<>(tempEntries);
     }
 
 
@@ -164,22 +162,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 
         return root;
     }
-
-    //Return the list of all key-value in entriesArray
-    public List traversePreRecursive(Entry<K,V> node, K key) {
-        if (node == null) return new ArrayList();
-
-        List nodeValues = new ArrayList();
-
-        if(node.getKey().compareTo(key) !=0 )
-            nodeValues.add(new Entry<>(node));
-
-        nodeValues.addAll(traversePreRecursive(node.getLeft(),key));
-        nodeValues.addAll(traversePreRecursive(node.getRight(),key));
-
-        return nodeValues;
-    }
-
+    
 
 
     public MapIterator iterator()
