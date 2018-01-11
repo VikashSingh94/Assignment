@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -22,15 +23,12 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 
     final private  Entry<K,V> [] table = new Entry[capacity]; //Array  storing the Tree object
 
-    final private  Entry<K,V> [] entriesArray;
+    //entriesArray will store key-value in  sequential manner
+    final private ArrayList< Entry<K,V> > entriesArray = new ArrayList<>();
 
 
     public HashMap(Entry<K,V> ... entries)
     {
-        //entriesArray will store key-value in  sequential manner
-        entriesArray = new Entry[entries.length];
-
-        int currentEntryIndex = 0;
 
         for (Entry<K,V> entry : entries)
         {
@@ -50,7 +48,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
                 //adding the updated root after inserting the key-value pair into the Binary tree
 
                 table[hash] = rootNode;
-                entriesArray[currentEntryIndex++] = entry;
+                entriesArray.add(entry);
             }
 
         }
@@ -59,7 +57,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     @Override
     public int size()
     {
-        return entriesArray.length;
+        return entriesArray.size();
     }
 
 
@@ -109,7 +107,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     @Override
     public  HashMap<K,V> put(K key,V value)
     {
-        Entry<K,V> [] tempEntries = new Entry[entriesArray.length+1];
+        Entry<K,V> [] tempEntries = new Entry[entriesArray.size()+1];
 
         int currentIndex = 0;
 
@@ -125,7 +123,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
                     tempEntries[currentIndex++] = new Entry<>(mapEntry);
             }
         }
-        
+
         return new HashMap<>(tempEntries);
     }
 
@@ -206,7 +204,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
         // elements.
         public boolean hasNext()
         {
-            return ( current < entriesArray.length );
+            return ( current < entriesArray.size() );
         }
 
 
@@ -220,13 +218,13 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 
         public Entry<K,V> next()
         {
-            if ( current >= entriesArray.length )
+            if ( current >= entriesArray.size() )
                 throw new NoSuchElementException();
 
             // advance current and return the item we just passed.
             current++;
             //new instance instead of reference
-            return new Entry<>(entriesArray[current - 1]);
+            return new Entry<>(entriesArray.get(current - 1));
         }
     }
 
