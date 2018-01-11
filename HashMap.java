@@ -24,7 +24,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     final private  Entry<K,V> [] table = new Entry[capacity]; //Array  storing the Tree object
 
     //entriesArray will store key-value in  sequential manner
-    final private ArrayList< Entry<K,V> > entriesArray = new ArrayList<>();
+    final private ArrayList< Entry<K,V> > sequentialEntries = new ArrayList<>();
 
 
     public HashMap(Entry<K,V> ... entries)
@@ -48,7 +48,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
                 //adding the updated root after inserting the key-value pair into the Binary tree
 
                 table[hash] = rootNode;
-                entriesArray.add(entry);
+                sequentialEntries.add(entry);
             }
 
         }
@@ -57,7 +57,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     @Override
     public int size()
     {
-        return entriesArray.size();
+        return sequentialEntries.size();
     }
 
 
@@ -107,7 +107,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
     @Override
     public  HashMap<K,V> put(K key,V value)
     {
-        Entry<K,V> [] tempEntries = new Entry[entriesArray.size()+1];
+        Entry<K,V> [] tempEntries = new Entry[sequentialEntries.size()+1];
 
         int currentIndex = 0;
 
@@ -115,13 +115,33 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
         tempEntries[currentIndex++] = (new Entry<>(key,value));
 
 
-        for(Entry<K,V> mapEntry : entriesArray)
+        for(Entry<K,V> mapEntry : sequentialEntries)
         {
             if(mapEntry != null)
             {
                 if(mapEntry.getKey().compareTo(key) != 0)
                     tempEntries[currentIndex++] = new Entry<>(mapEntry);
             }
+        }
+
+        return new HashMap<>(tempEntries);
+    }
+
+
+
+    @Override
+
+    public HashMap<K,V> remove(K key)
+    {
+        Entry<K,V> [] tempEntries = new Entry[sequentialEntries.size()-1];
+
+        int currentIndex = 0;
+
+
+        for(Entry<K,V> mapEntry : sequentialEntries)
+        {
+                if(mapEntry.getKey().compareTo(key) != 0)
+                    tempEntries[currentIndex++] = new Entry<>(mapEntry);
         }
 
         return new HashMap<>(tempEntries);
@@ -204,7 +224,7 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
         // elements.
         public boolean hasNext()
         {
-            return ( current < entriesArray.size() );
+            return ( current < sequentialEntries.size() );
         }
 
 
@@ -218,13 +238,13 @@ final class HashMap<K extends Comparable<K>,V extends Comparable<V>> implements 
 
         public Entry<K,V> next()
         {
-            if ( current >= entriesArray.size() )
+            if ( current >= sequentialEntries.size() )
                 throw new NoSuchElementException();
 
             // advance current and return the item we just passed.
             current++;
             //new instance instead of reference
-            return new Entry<>(entriesArray.get(current - 1));
+            return new Entry<>(sequentialEntries.get(current - 1));
         }
     }
 
