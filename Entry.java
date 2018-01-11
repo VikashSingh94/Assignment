@@ -23,8 +23,13 @@ class Entry<K extends Comparable<K>, V extends Comparable<V>> implements Compara
 
     public Entry()
     {
-
+        this.key    =   null;
+        this.value  =   null;
+        this.left   =   null;
+        this.right  =   null;
     }
+
+
     public V getValue() {
         return value;
     }
