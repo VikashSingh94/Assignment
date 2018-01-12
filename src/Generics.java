@@ -46,7 +46,7 @@ public class Generics {
                 System.out.println(temp.getKey() + " " + temp.getValue());
 
             }
-      /*
+
             //removing the entry in studentNewMap
             studentNewMap = studentNewMap.remove("vikash");
 
@@ -74,7 +74,7 @@ public class Generics {
                 System.out.println(temp.getKey() + " " + temp.getValue());
 
             }
-    */
+
 
         }
         catch (Exception e)

@@ -7,5 +7,11 @@ public interface Map<K,V>
 
     V get(K key);
 
+    Object remove(K key);
+
     Object put(K key, V value);
+
+
 }
+
+
