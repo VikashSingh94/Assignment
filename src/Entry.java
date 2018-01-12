@@ -1,3 +1,4 @@
+package src;
 
 class Entry<K extends Comparable<K>, V extends Comparable<V>> implements Comparable<Entry<K, V>> {
 
